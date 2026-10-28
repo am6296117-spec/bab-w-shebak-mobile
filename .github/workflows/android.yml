@@ -1,0 +1,38 @@
+name: Build Android APK
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Arrange files
+        run: |
+          mkdir -p www android-res/values
+          mv index.html www/
+          mv ic_launcher_background.xml android-res/values/
+          for f in mipmap-*__*; do
+            d="android-res/${f%%__*}"
+            mkdir -p "$d"
+            mv "$f" "$d/${f#*__}"
+          done
+      - name: Set app URL
+        run: sed -i "s|https://YOUR-DOMAIN|${{ vars.APP_URL }}|" capacitor.config.json
+      - run: npm install
+      - run: npx cap add android
+      - name: Copy icons
+        run: cp -r android-res/* android/app/src/main/res/
+      - run: npx cap sync android
+      - name: Build APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bab-w-shebak-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
