@@ -1,0 +1,3 @@
+{"appId":"com.babwshebak.app","appName":"باب وشباك","webDir":"www",
+"server":{"url":"https://YOUR-DOMAIN","cleartext":false,"androidScheme":"https"},
+"android":{"allowMixedContent":false}}
